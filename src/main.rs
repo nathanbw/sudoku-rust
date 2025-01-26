@@ -61,8 +61,11 @@ impl Sudoku {
     }
 
     fn load_board(&mut self, board: Vec<u32>) {
-        assert_eq!(board.len(), (self.dimension * self.dimension),
-                   "Tried to load board of wrong dimension!");
+        assert_eq!(
+            board.len(),
+            (self.dimension * self.dimension),
+            "Tried to load board of wrong dimension!"
+        );
         for i in 0..board.len() {
             let cell = self.cells.get_mut(i).unwrap();
             cell.current_value = board[i];
@@ -100,7 +103,8 @@ impl Sudoku {
                             potential_values.remove(&cell.current_value);
                         }
                     }
-                } else { // y >= 2
+                } else {
+                    // y >= 2
                     // Bottom left quadrant
                     for i_x in 0..2 {
                         for i_y in 2..4 {
@@ -109,7 +113,8 @@ impl Sudoku {
                         }
                     }
                 }
-            } else { // x >= 2
+            } else {
+                // x >= 2
                 if y < 2 {
                     // Top right quadrant
                     for i_x in 2..4 {
@@ -118,7 +123,8 @@ impl Sudoku {
                             potential_values.remove(&cell.current_value);
                         }
                     }
-                } else { // y >= 2
+                } else {
+                    // y >= 2
                     // Bottom left quadrant
                     for i_x in 2..4 {
                         for i_y in 2..4 {
@@ -167,8 +173,8 @@ impl Sudoku {
                             potential_values.remove(&cell.current_value);
                         }
                     }
-
-                } else { // y >= 6
+                } else {
+                    // y >= 6
                     // Bottom left quadrant
                     for i_x in 0..3 {
                         for i_y in 6..9 {
@@ -194,8 +200,8 @@ impl Sudoku {
                             potential_values.remove(&cell.current_value);
                         }
                     }
-
-                } else { // y >= 6
+                } else {
+                    // y >= 6
                     // Bottom middle quadrant
                     for i_x in 3..6 {
                         for i_y in 6..9 {
@@ -204,7 +210,8 @@ impl Sudoku {
                         }
                     }
                 }
-            } else { // x >= 6
+            } else {
+                // x >= 6
                 if y < 3 {
                     // Top right quadrant
                     for i_x in 6..9 {
@@ -221,8 +228,8 @@ impl Sudoku {
                             potential_values.remove(&cell.current_value);
                         }
                     }
-
-                } else { // y >= 6
+                } else {
+                    // y >= 6
                     // Bottom right quadrant
                     for i_x in 6..9 {
                         for i_y in 6..9 {
@@ -243,12 +250,16 @@ impl Sudoku {
         // Base cases:
         // If we're on the last cell:
         if index == ((self.dimension * self.dimension) - 1) {
-            if cell.is_locked { // If the last cell is locked, we're done!
+            if cell.is_locked {
+                // If the last cell is locked, we're done!
                 return Ok(());
             }
             let potential_values = self.gather_possible_values(x, y);
             if potential_values.is_empty() {
-                return Err(format!("Cell at {} returning err because no possible values remain", index));
+                return Err(format!(
+                    "Cell at {} returning err because no possible values remain",
+                    index
+                ));
             } else {
                 // There's at least one value in potential_values. There should be exactly one, or else
                 assert_eq!(potential_values.len(), 1);
@@ -265,7 +276,10 @@ impl Sudoku {
 
         let potential_values = self.gather_possible_values(x, y);
         if potential_values.is_empty() {
-            return Err(format!("Cell at {} returning err because no possible values remain", index));
+            return Err(format!(
+                "Cell at {} returning err because no possible values remain",
+                index
+            ));
         } else {
             for x in potential_values {
                 self.cells.get_mut(index).unwrap().current_value = x;
@@ -278,7 +292,10 @@ impl Sudoku {
                     }
                 }
             }
-            return Err(format!("Cell at {}: Tried all values, none led to solve ", index));
+            return Err(format!(
+                "Cell at {}: Tried all values, none led to solve ",
+                index
+            ));
         }
     }
 }
@@ -306,7 +323,7 @@ impl std::fmt::Display for Sudoku {
                     }
                 }
             }
-            return write!(f, "+---+---++---+---+")
+            return write!(f, "+---+---++---+---+");
         }
         if self.dimension == 9 {
             for y in 0..9 {
@@ -331,7 +348,6 @@ impl std::fmt::Display for Sudoku {
                 }
             }
             return write!(f, "||===+===+===++===+===+===++===+===+===||\n");
-
         }
         write!(f, "Not implemented for dimension {}", self.dimension)
     }
