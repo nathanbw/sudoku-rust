@@ -1,33 +1,26 @@
 use std::collections::HashSet;
-#[derive(Debug)]
-#[derive(Clone)]
 struct DokuCell {
-    pub index: usize,
     pub current_value: u32,
     pub is_locked: bool,
-    pub potential_values: HashSet<u32>,
 }
 
 impl DokuCell {
-    fn new(index: usize) -> Self {
-        let mut new_cell = DokuCell {
-            index,
+    fn new() -> Self {
+        let new_cell = DokuCell {
             current_value: 0,
             is_locked: false,
-            potential_values: HashSet::new(),
         };
         new_cell
     }
 }
 
-#[derive(Clone)]
 struct Sudoku {
     cells: Vec<DokuCell>,
     dimension: usize,
 }
 
 impl Sudoku {
-    // This is a mini-sudoku board of size 4x4; it looks kind of like this;
+    // This is a mini-sudoku board of size 4x4; it looks kind of like this.
     // In the diagram below, you can see which x, y pair corresponds to which
     // index in the cells vector:
     //
@@ -50,8 +43,8 @@ impl Sudoku {
             cells: Vec::new(),
             dimension,
         };
-        for i in 0..(dimension * dimension) {
-            my_doku.cells.push(DokuCell::new(i));
+        for _i in 0..(dimension * dimension) {
+            my_doku.cells.push(DokuCell::new());
         }
         my_doku
     }
@@ -71,7 +64,7 @@ impl Sudoku {
         assert_eq!(board.len(), (self.dimension * self.dimension),
                    "Tried to load board of wrong dimension!");
         for i in 0..board.len() {
-            let mut cell = self.cells.get_mut(i).unwrap();
+            let cell = self.cells.get_mut(i).unwrap();
             cell.current_value = board[i];
             cell.is_locked = true;
         }
@@ -82,23 +75,22 @@ impl Sudoku {
         for value in 1..(self.dimension + 1) {
             potential_values.insert(value as u32);
         }
-        for i in 0..self.dimension {
-            if i == x {
+        for x_i in 0..self.dimension {
+            if x_i == x {
                 continue;
             }
-            let cell = self.cell_at(i, y);
+            let cell = self.cell_at(x_i, y);
             potential_values.remove(&cell.current_value);
         }
-        for i in 0..self.dimension {
-            if i == y {
+        for y_i in 0..self.dimension {
+            if y_i == y {
                 continue;
             }
-            let cell = self.cell_at(x, i);
+            let cell = self.cell_at(x, y_i);
             potential_values.remove(&cell.current_value);
         }
         // TODO: Figure out if you can factor this better and maybe even avoid magic numbers?
         if self.dimension == 4 {
-            // How to calculate quadrant?
             if x < 2 {
                 if y < 2 {
                     // Top left quadrant
@@ -157,7 +149,6 @@ impl Sudoku {
         //      +---+---+---++---+---+---++---+---+---+
         //    8 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14|
         //      +---+---+---++---+---+---++---+---+---+
-
         if self.dimension == 9 {
             if x < 3 {
                 if y < 3 {
@@ -248,14 +239,14 @@ impl Sudoku {
     fn solve(&mut self, index: usize) -> Result<(), String> {
         let (x, y) = self.get_coords(index);
         let cell = self.cells.get(index).unwrap();
-        let mut potential_values = HashSet::new();
+        // let mut potential_values = HashSet::new();
         // Base cases:
         // If we're on the last cell:
         if index == ((self.dimension * self.dimension) - 1) {
             if cell.is_locked { // If the last cell is locked, we're done!
                 return Ok(());
             }
-            potential_values = self.clone().gather_possible_values(x, y);
+            let potential_values = self.gather_possible_values(x, y);
             if potential_values.is_empty() {
                 return Err(format!("Cell at {} returning err because no possible values remain", index));
             } else {
@@ -272,7 +263,7 @@ impl Sudoku {
             return self.solve(index + 1);
         }
 
-        potential_values = self.gather_possible_values(x, y);
+        let potential_values = self.gather_possible_values(x, y);
         if potential_values.is_empty() {
             return Err(format!("Cell at {} returning err because no possible values remain", index));
         } else {
@@ -289,8 +280,6 @@ impl Sudoku {
             }
             return Err(format!("Cell at {}: Tried all values, none led to solve ", index));
         }
-
-        Ok(())
     }
 }
 
@@ -320,26 +309,26 @@ impl std::fmt::Display for Sudoku {
             return write!(f, "+---+---++---+---+")
         }
         if self.dimension == 9 {
-            //   X:   0   1   2    3   4   5    6   7   8
-            //      +===+===+===++===+===+===++===+===+===++
-            // Y: 0 | 0 | 1 | 2 || 3 | 4 | 5 || 6 | 7 | 8 ||
-            //      |---+---+---+|---+---+---++---+---+---+|
-            //    1 | 9 | 10| 11|| 12| 13| 14|| 15| 16| 17||
-            //      |---+---+---+|---+---+---++---+---+---+|
-            //    2 | 18| 10| 20|| 21| 22| 23|| 8 | 9 | 10||
-            //      |===+===+===+|===+===+===++===+===+===+|
-            //    3 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14||
-            //      |---+---+---+|---+---+---++---+---+---+|
-            //    4 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14||
-            //      |---+---+---+|---+---+---++---+---+---+|
-            //    5 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14||
-            //      |===+===+===+|===+===+===++===+===+===+|
-            //    6 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14||
-            //      +---+---+---++---+---+---++---+---+---++
-            //    7 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14||
-            //      +---+---+---++---+---+---++---+---+---++
-            //    8 | 12| 13| 14|| 12| 13| 14|| 12| 13| 14||
-            //      +===+===+===+|===+===+===++===+===+===++
+            //   X:    0   1   2    3   4   5    6   7   8
+            //      ||===+===+===++===+===+===++===+===+===||
+            // Y: 0 || 9 | 4 | 3 || 5 | 8 | 7 || 2 | 1 | 6 ||
+            //      ++---+---+---++---+---+---++---+---+---++
+            //    1 || 2 | 6 | 5 || 9 | 1 | 4 || 7 | 3 | 8 ||
+            //      ++---+---+---++---+---+---++---+---+---++
+            //    2 || 8 | 1 | 7 || 6 | 2 | 3 || 5 | 4 | 9 ||
+            //      ||===+===+===++===+===+===++===+===+===||
+            //    3 || 4 | 2 | 6 || 3 | 7 | 8 || 1 | 9 | 5 ||
+            //      ++---+---+---++---+---+---++---+---+---++
+            //    4 || 5 | 3 | 9 || 1 | 6 | 2 || 4 | 8 | 7 ||
+            //      ++---+---+---++---+---+---++---+---+---++
+            //    5 || 1 | 7 | 8 || 4 | 5 | 9 || 6 | 2 | 3 ||
+            //      ||===+===+===++===+===+===++===+===+===||
+            //    6 || 3 | 9 | 2 || 7 | 4 | 6 || 8 | 5 | 1 ||
+            //      ++---+---+---++---+---+---++---+---+---++
+            //    7 || 7 | 5 | 4 || 8 | 3 | 1 || 9 | 6 | 2 ||
+            //      ++---+---+---++---+---+---++---+---+---++
+            //    8 || 6 | 8 | 1 || 2 | 9 | 5 || 3 | 7 | 4 ||
+            //      ||===+===+===++===+===+===++===+===+===||
             for y in 0..9 {
                 if y % 3 == 0 {
                     write!(f, "||===+===+===++===+===+===++===+===+===||\n")?;
@@ -349,7 +338,7 @@ impl std::fmt::Display for Sudoku {
                 }
                 for x in 0..9 {
                     if x == 0 {
-                        write!(f, "|");
+                        write!(f, "|")?;
                     }
                     if x % 3 == 2 {
                         write!(f, "| {} |", self.cell_at(x, y).current_value)?;
