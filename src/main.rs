@@ -68,6 +68,9 @@ impl Sudoku {
         );
         for i in 0..board.len() {
             let cell = self.cells.get_mut(i).unwrap();
+            if board[i] == 0 {
+                continue;
+            }
             cell.current_value = board[i];
             cell.is_locked = true;
         }
@@ -354,12 +357,14 @@ impl std::fmt::Display for Sudoku {
 }
 
 fn main() {
-    // let puzzle: Vec<u32> = vec![
-    //     1, 2, 3, 4
-    //     3, 4, 1, 2
-    //
-    // ];
-    let mut my_doku = Sudoku::new(9);
+    let puzzle: Vec<u32> = vec![
+        0, 2, 3, 4,
+        3, 0, 1, 2,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ];
+    let mut my_doku = Sudoku::new(4);
+    my_doku.load_board(puzzle);
     // println!("{my_doku}");
     // println!("{}", my_doku.cell_at(3, 2).current_value);
     match my_doku.solve(0) {
@@ -370,4 +375,29 @@ fn main() {
             println!("{}", e);
         }
     }
+
+    let puzzle: Vec<u32> = vec![
+        0, 3, 4, 0, 0, 0, 0, 6, 0,
+        0, 5, 0, 1, 0, 0, 0, 0, 0,
+        9, 2, 0, 0, 0, 0, 0, 0, 3,
+        5, 0, 0, 0, 8, 0, 3, 0, 9,
+        0, 0, 0, 0, 4, 0, 0, 0, 0,
+        1, 0, 8, 0, 7, 0, 0, 0, 5,
+        4, 0, 0, 0, 0, 0, 0, 1, 6,
+        0, 0, 0, 0, 0, 5, 0, 9, 0,
+        0, 8, 0, 0, 0, 0, 2, 3, 0,
+    ];
+    let mut my_doku = Sudoku::new(9);
+    my_doku.load_board(puzzle);
+    // println!("{my_doku}");
+    // println!("{}", my_doku.cell_at(3, 2).current_value);
+    match my_doku.solve(0) {
+        Ok(_) => {
+            println!("{}", my_doku);
+        }
+        Err(e) => {
+            println!("{}", e);
+        }
+    }
+
 }
